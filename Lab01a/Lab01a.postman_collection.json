@@ -1,0 +1,68 @@
+{
+	"info": {
+		"_postman_id": "3f4d32a6-b354-457a-9234-833b6e83c01c",
+		"name": "Lab01a",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28197128"
+	},
+	"item": [
+		{
+			"name": "2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5023/sample.RNA?ParmA=hello&ParmB=world",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5023",
+					"path": [
+						"sample.RNA"
+					],
+					"query": [
+						{
+							"key": "ParmA",
+							"value": "hello"
+						},
+						{
+							"key": "ParmB",
+							"value": "world"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5023/put.RNA?ParmA=hello&ParmB=world",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5023",
+					"path": [
+						"put.RNA"
+					],
+					"query": [
+						{
+							"key": "ParmA",
+							"value": "hello"
+						},
+						{
+							"key": "ParmB",
+							"value": "world"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
