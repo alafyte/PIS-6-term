@@ -1,0 +1,7 @@
+@hostname=localhost﻿
+@port=5299
+GET http://{{hostname}}:{{port}}/Status/S200
+###
+GET http://{{hostname}}:{{port}}/Status/S300
+###
+GET http://{{hostname}}:{{port}}/Status/S500
