@@ -1,0 +1,45 @@
+﻿@{
+    Layout = null;
+
+    string action = "Sum";
+
+    string press = (string)ViewBag.press;
+    switch (press)
+    {
+        case "+": action = "Sum"; break;
+        case "-": action = "Sub"; break;
+        case "*": action = "Mul"; break;
+        case "/": action = "Div"; break;
+        default: action = "Index"; break;
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ASPCMVC07</title>
+</head>
+<body>
+
+    @await Html.PartialAsync("_CalcLink")
+
+    @if (!String.IsNullOrEmpty(press))
+    {
+        @using (Html.BeginForm(action, "Calc", FormMethod.Post))
+        {
+            <div style="display: flex; margin-top: 10px">
+                @await Html.PartialAsync("_Calc")
+                <input type="submit" name="press" value="@press" />
+            </div>
+
+
+            <div class="fw-bolder" style="color:red; font-size:larger;">
+                @ViewBag.Error
+            </div>
+        }
+    }
+
+</body>
+</html>
