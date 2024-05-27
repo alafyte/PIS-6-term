@@ -1,0 +1,310 @@
+﻿@model IEnumerable<WSREF>
+
+@{
+    ViewData["Title"] = "UWSR";
+    string currentUserMode = ViewBag.CurrentUserMode;
+}
+
+<h2 class="text-center">@ViewData["Title"]</h2>
+
+@if (currentUserMode == "GUEST" || currentUserMode == "")
+{
+    <h2 class="text-center d-none" id="login_head">Войти в свой аккаунт</h2>
+    <form method="post" asp-action="EnterPassword" id="login" class="w-25 mx-auto d-none">
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required class="form-control" />
+        <button type="submit" class="btn btn-primary mt-4 mx-auto d-block">Войти</button>
+    </form>
+}
+else if (currentUserMode == "OWNER")
+{
+    <form method="post" asp-action="ResetPassword" class="w-25 mx-auto">
+        <button type="submit" class="btn btn-primary mt-4 d-block mx-auto">Выйти</button>
+    </form>
+    <br />
+}
+
+<h2 class="text-center mt-4">Применить фильтр</h2>
+<form id="filterForm" class="w-25 mx-auto">
+    <label for="filter">Фильтр:</label>
+    <input type="text" id="filter" name="filter" class="form-control" />
+    <button type="button" onclick="applyFilter()" class="btn btn-primary mt-4 mx-auto d-block">Применить</button>
+</form>
+
+@if (currentUserMode == "OWNER")
+{
+    <button id="addLinkButton" class="btn btn-primary">Добавить</button>
+    <div id="addLinkForm" style="display:none;">
+        @await Html.PartialAsync("_AddLinkForm")
+    </div>
+}
+
+
+<style>
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .link-container {
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<table>
+    <thead>
+        <tr>
+            <th>ПОЛЕЗНЫЕ ССЫЛКИ</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            @foreach (var link in Model)
+            {
+                <tr data-description="@link.Description">
+                    <td>[@link.Id] <a href="@link.Url">@link.Description.ToUpper()</a></td>
+                </tr>
+
+                <tr data-description="@link.Description">
+                    <td colspan="2" class="link-container">
+                        @if (currentUserMode == "OWNER")
+                        {
+                            <button class="editLinkButton btn btn-primary mx-2" data-link-id="@link.Id">Изменить</button>
+                            <div id="editLinkForm_@link.Id" class="hidden">
+                                @await Html.PartialAsync("_EditLinkForm", link)
+                            </div>
+
+                            <button class="deleteLinkButton btn btn-primary mx-2" data-link-id="@link.Id">Удалить</button>
+                            <div id="deleteLinkForm_@link.Id" class="hidden">
+                                @await Html.PartialAsync("_DeleteLinkForm", link)
+                            </div>
+                        }
+
+                        <button class="plusButton btn btn-primary mx-2" data-link-id="@link.Id" type="button" onclick="increaseCounter('@link.Id')">+@link.Plus</button>
+                        <button class="minusButton btn btn-primary mx-2" data-link-id="@link.Id" type="button" onclick="decreaseCounter('@link.Id')">@link.Minus</button>
+
+                        <form method="get" data-action="ShowComments" data-link-id="@link.Id" class="showCommentsButton" style="width: 128px;">
+                            <button class="btn btn-primary mx-2" type="button">Комментарии</button>
+                        </form>
+
+
+                        <button class="addCommentButton btn btn-primary mx-4" data-link-id="@link.Id">Добавить комментарий</button>
+                        <div id="addCommentForm_@link.Id" class="hidden">
+                            @await Html.PartialAsync("_AddCommentForm", new WSREFCOMMENT { WSREFId = link.Id })
+                        </div>
+                    </td>
+                </tr>
+
+                <tr data-description="@link.Description">
+                    <td colspan="2">
+                        <div id="commentsContainer_@link.Id"></div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<script>
+    document.addEventListener('keydown', function (event) {
+        if (event.ctrlKey && event.key === 'm') {
+            const form = document.getElementById('login');
+            const head = document.getElementById('login_head');
+            if (form) {
+                form.classList.remove('d-none');
+                document.getElementById('password').focus();
+                event.preventDefault();
+            }
+            if (head) {
+                form.classList.remove('d-none');
+            }
+        }
+    });
+
+    const addLinkButton = document.getElementById('addLinkButton');
+    if (addLinkButton) {
+        addLinkButton.addEventListener('click', function () {
+            document.getElementById('addLinkForm').style.display = 'block';
+        });
+    }
+
+    function cancelDeleteComment(commentId) {
+        document.getElementById('deleteCommentForm_' + commentId).style.display = 'none';
+    }
+
+    function cancelEditComment(commentId) {
+        document.getElementById('editCommentForm_' + commentId).style.display = 'none';
+    }
+
+    function setupEventHandlers() {
+        document.querySelectorAll('.deleteCommentButton').forEach(button => {
+            button.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                document.getElementById('deleteCommentForm_' + commentId).style.display = 'block';
+            });
+        });
+
+        document.querySelectorAll('.editCommentButton').forEach(button => {
+            button.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                document.getElementById('editCommentForm_' + commentId).style.display = 'block';
+            });
+        });
+
+        document.querySelectorAll('.editLinkButton').forEach(button => {
+            button.addEventListener('click', function () {
+                const linkId = this.getAttribute('data-link-id');
+                document.getElementById('editLinkForm_' + linkId).style.display = 'block';
+            });
+        });
+
+        document.querySelectorAll('.deleteLinkButton').forEach(button => {
+            button.addEventListener('click', function () {
+                const linkId = this.getAttribute('data-link-id');
+                document.getElementById('deleteLinkForm_' + linkId).style.display = 'block';
+            });
+        });
+
+        document.querySelectorAll('.addCommentButton').forEach(button => {
+            button.addEventListener('click', function () {
+                const linkId = this.getAttribute('data-link-id');
+                document.getElementById('addCommentForm_' + linkId).style.display = 'block';
+            });
+        });
+
+        document.querySelectorAll('.showCommentsButton').forEach(button => {
+            button.addEventListener('click', function () {
+                const linkId = this.getAttribute('data-link-id');
+                const commentsContainer = document.getElementById('commentsContainer_' + linkId);
+
+                if (commentsContainer.style.display === 'none' || commentsContainer.innerHTML.trim() === '') {
+                    loadComments(linkId, commentsContainer);
+                    showAddCommentButton(linkId);
+                } else {
+                    commentsContainer.style.display = 'none';
+                    hideAddCommentButton(linkId);
+                }
+            });
+        });
+    }
+
+    setupEventHandlers();
+
+    function showAddCommentButton(linkId) {
+        const addCommentButton = document.querySelector('.addCommentButton[data-link-id="' + linkId + '"]');
+        if (addCommentButton) {
+            addCommentButton.style.display = 'inline-block';
+        }
+    }
+
+    function hideAddCommentButton(linkId) {
+        const addCommentButton = document.querySelector('.addCommentButton[data-link-id="' + linkId + '"]');
+        if (addCommentButton) {
+            addCommentButton.style.display = 'none';
+        }
+    }
+
+    function increaseCounter(linkId) {
+        fetch(`/UWSR/IncreaseCounter?linkId=${linkId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    updateCounterValues(linkId);
+                }
+            })
+            .catch(error => console.error('Ошибка при выполнении запроса:', error));
+    }
+
+    function decreaseCounter(linkId) {
+        fetch(`/UWSR/DecreaseCounter?linkId=${linkId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    updateCounterValues(linkId);
+                }
+            })
+            .catch(error => console.error('Ошибка при выполнении запроса:', error));
+    }
+
+    function applyFilter() {
+        const delimiters = /\s+|[,\.!?]/;
+        const filterInput = document.getElementById('filter'); 
+        let filterValue = filterInput.value.toLowerCase().trim().split(delimiters);
+        filterValue = filterValue.filter(value => value !== '');
+        document.querySelectorAll('tr[data-description]').forEach(row => {
+            const description = row.getAttribute('data-description').toLowerCase(); 
+            if (filterValue.length === 0) {
+                row.style.display = 'table-row';
+            } else {
+                const display = filterValue.some(value => description.includes(value)); const style = display ? 'table-row' : 'none';
+                row.style.display = style;
+            }
+        });
+    }
+
+
+
+    function updateCounterValues(linkId) {
+        fetch(`/UWSR/GetLinkValues?linkId=${linkId}`)
+            .then(response => response.json())
+            .then(data => {
+                const plusButton = document.querySelector('.plusButton[data-link-id="' + linkId + '"]');
+                const minusButton = document.querySelector('.minusButton[data-link-id="' + linkId + '"]');
+
+                console.log(data);
+                console.log(plusButton);
+                console.log(minusButton);
+
+                if (plusButton) {
+                    plusButton.textContent = `+${data.plus}`;
+                }
+                if (minusButton) {
+                    minusButton.textContent = `${data.minus}`;
+                }
+            })
+            .catch(error => console.error('Ошибка при выполнении запроса:', error));
+    }
+
+    function loadComments(linkId, commentsContainer) {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    commentsContainer.innerHTML = xhr.responseText;
+                    setupEventHandlers();
+                } else {
+                    console.error('Failed to load comments.');
+                }
+            }
+        };
+
+        xhr.open('GET', '/UWSR/ShowComments/' + linkId, true);
+        xhr.send();
+    }
+</script>

@@ -1,0 +1,25 @@
+﻿@model WSREFCOMMENT
+
+<div>
+    @using (Html.BeginForm("UpdateComment", "UWSR", FormMethod.Post))
+    {
+        <input type="hidden" name="Id" value="@Model.Id" />
+        <input type="text" name="ComText" class="form-control w-25 mt-4" value="@Model.ComText" required>
+        <br/>
+        <button type="submit" class="btn btn-primary"> Изменить</button>
+        <button type="button" class="btn btn-primary" onclick="cancelEditComment('@Model.Id')">Отмена</button>
+    }
+</div>
+
+<script>
+    document.querySelectorAll('.editCommentButton').forEach(button => {
+        button.addEventListener('click', function () {
+            const commentId = this.getAttribute('data-comment-id');
+            document.getElementById('editCommentForm_' + commentId).style.display = 'block';
+        });
+    });
+
+    function cancelEditComment(commentId) {
+        document.getElementById('editCommentForm_' + commentId).style.display = 'none';
+    }
+</script>

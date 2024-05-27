@@ -1,0 +1,20 @@
+﻿@model WSREFCOMMENT
+
+@using (Html.BeginForm("AddComment", "UWSR", FormMethod.Post))
+{
+    <input type="hidden" name="WSREFId" value="@Model.WSREFId" />
+
+    <label for="commentText_@Model.WSREFId">Текст комментария:</label>
+    <input type="text" id="commentText_@Model.WSREFId" class="form-control" name="ComText" required />
+
+
+
+    <button type="submit" class="btn btn-primary mt-4">Добавить</button>
+    <button type="button" class="btn btn-primary mt-4" onclick="cancelAddComment('@Model.WSREFId')">Отменить</button>
+}
+
+<script>
+    function cancelAddComment(linkId) {
+        document.getElementById('addCommentForm_' + linkId).style.display = 'none';
+    }
+</script>

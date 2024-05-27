@@ -1,0 +1,19 @@
+﻿@model WSREF
+
+@using (Html.BeginForm("UpdateLink", "UWSR", FormMethod.Post))
+{
+    <input type="hidden" name="Id" value="@Model.Id" />
+    <label for="url_@Model.Id">URL:</label>
+    <input class="form-control" type="text" id="url_@Model.Id" name="Url" value="@Model.Url" required />
+    <label for="description_@Model.Id">Описание:</label>
+    <input type="text" class="form-control" id="description_@Model.Id" name="Description" value="@Model.Description" required />
+
+    <button type="submit" class="btn btn-primary mt-4">Изменить</button>
+    <button type="button" class="btn btn-primary mt-4" onclick="cancelEditLink('@Model.Id')">Отменить</button>
+}
+
+<script>
+    function cancelEditLink(linkId) {
+        document.getElementById('editLinkForm_' + linkId).style.display = 'none';
+    }
+</script>

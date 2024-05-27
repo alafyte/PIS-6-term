@@ -1,0 +1,16 @@
+﻿@using (Html.BeginForm("AddLink", "UWSR", FormMethod.Post))
+{
+    <label for="url" class="mt-4">URL:</label>
+    <input class="form-control w-25" type="text" id="url" name="Url" required />
+    <label for="description">Описание:</label>
+    <input class="form-control w-25" type="text" id="description" name="Description" required />
+
+    <button type="submit" class="btn btn-primary mt-4">Добавить</button>
+    <button type="button" class="btn btn-primary mt-4" onclick="cancelAddLink()">Отменить</button>
+}
+
+<script>
+    function cancelAddLink() {
+        document.getElementById('addLinkForm').style.display = 'none';
+    }
+</script>

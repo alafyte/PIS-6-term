@@ -1,0 +1,51 @@
+﻿@model List<WSREFCOMMENT>
+
+@{
+    string currentUserMode = ViewBag.CurrentUserMode;
+    string currentSessionId = ViewBag.СurrentSessionId;
+}
+
+
+<h2>Комментарии</h2>
+
+@if (Model != null && Model.Any())
+{
+    <ul>
+        @foreach (var comment in Model)
+
+        {
+            <li>
+                @comment.ComText
+
+                @if (currentUserMode == "OWNER" || comment.SessionId == currentSessionId)
+                {
+                    <br/>
+                    <button class="editCommentButton btn btn-primary mt-4" data-comment-id="@comment.Id">Изменить</button>
+                    <div id="editCommentForm_@comment.Id" style="display:none;">
+                        @await Html.PartialAsync("_EditCommentForm", comment)
+                    </div>
+               
+                    <button class="deleteCommentButton btn btn-primary mt-4" data-comment-id="@comment.Id">Удалить</button>
+                    <div id="deleteCommentForm_@comment.Id" style="display:none;">
+                        @await Html.PartialAsync("_DeleteCommentForm", comment)
+                    </div>
+                    <br /> <br />
+                }
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>Ещё нет комментариев</p>
+}
+
+
+<script>
+    document.querySelectorAll('.deleteCommentButton').forEach(button => {
+        button.addEventListener('click', function () {
+            const commentId = this.getAttribute('data-comment-id');
+            document.getElementById('deleteCommentForm_' + commentId).style.display = 'block';
+        });
+    });
+</script>
